@@ -6,25 +6,27 @@ import cors from 'cors';
 
 // CORS configuration
 const corsOptions = {
-  origin: process.env.NEXT_PUBLIC_CORS_ALLOWED_ORIGIN, 
-  credentials: true, 
+  origin: process.env.NEXT_PUBLIC_CORS_ALLOWED_ORIGIN, // Adjust this to the front-end origin
+  credentials: true, // Allow cookies to be sent with requests
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  preflightContinue: false, 
-  optionsSuccessStatus: 204, 
+  preflightContinue: false, // Allow the preflight to be handled by this middleware
+  optionsSuccessStatus: 204, // Handle legacy browsers that might not support the 204 status code
 };
 
 const handler = createRouter();
 
-
+// Apply the CORS middleware globally
 handler.use(cors(corsOptions));
 
+// Handle the POST request for user registration or login
 handler.post(async (req, res) => {
   try {
     await dbConnect();
     const { name, phone, password, accessToken } = req.body;
-
-
+    console.log(phone);
+    
+    // Validate input
     if (!name || !phone || !password || !accessToken) {
       return res.status(400).json({ 
         success: false, 
@@ -37,6 +39,8 @@ handler.post(async (req, res) => {
 
     if (existingUser) {
       // User already exists, generate JWT token and send it back
+      console.log('existing');
+      
       const token = jwt.sign(
         { id: existingUser._id }, 
         process.env.JWT_SECRET, 
@@ -44,7 +48,7 @@ handler.post(async (req, res) => {
       );
 
       // Set cookie
-      res.setHeader('Set-Cookie', `token=${token}; HttpOnly; Path=/; Max-Age=86400; SameSite=Strict`);
+      res.setHeader('Set-Cookie', `token=${token}; HttpOnly; Path=/; Max-Age=86400; SameSite=None; Secure`);
 
       return res.status(200).json({ 
         success: true, 
@@ -72,7 +76,7 @@ handler.post(async (req, res) => {
     );
 
     // Set cookie
-    res.setHeader('Set-Cookie', `token=${token}; HttpOnly; Path=/; Max-Age=86400; SameSite=Strict`);
+    res.setHeader('Set-Cookie', `token=${token}; HttpOnly; Path=/; Max-Age=86400; SameSite=None; Secure`);
 
     res.status(201).json({ 
       success: true, 

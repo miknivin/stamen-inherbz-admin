@@ -57,7 +57,7 @@ handler.post(async (req, res) => {
     }
 
     if (!email) {
-      email = `${name}${randomUUID()}@gmail.com`;
+      email = `${name}${randomUUID()}12@gmail.com`;
     }
 
     // User does not exist, create a new user
